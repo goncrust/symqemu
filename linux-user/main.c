@@ -969,6 +969,8 @@ int main(int argc, char **argv, char **envp)
         _exit(EXIT_FAILURE);
     }
 
+    _sym_set_code_range(info->start_code, info->end_code);
+
     for (wrk = target_environ; *wrk; wrk++) {
         g_free(*wrk);
     }
