@@ -699,6 +699,11 @@ void HELPER(sym_notify_return)(uint64_t return_address)
     _sym_notify_ret(return_address);
 }
 
+void HELPER(sym_notify_jcc)(uint64_t at, uint64_t jump, uint64_t fall)
+{
+    _sym_notify_jcc(at, jump, fall);
+}
+
 void HELPER(sym_notify_block)(uint64_t block_id)
 {
     _sym_notify_basic_block(block_id);

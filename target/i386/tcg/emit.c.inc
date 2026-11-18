@@ -2040,8 +2040,16 @@ static void gen_IRET(DisasContext *s, X86DecodedInsn *decode)
     s->base.is_jmp = DISAS_EOB_ONLY;
 }
 
+static void gen_notify_jcc(DisasContext *s, target_long diff)
+{
+    gen_helper_sym_notify_jcc(tcg_constant_i64(s->base.pc_next),
+                              tcg_constant_i64(s->pc + diff),
+                              tcg_constant_i64(s->pc));
+}
+
 static void gen_Jcc(DisasContext *s, X86DecodedInsn *decode)
 {
+    gen_notify_jcc(s, decode->immediate);
     gen_bnd_jmp(s);
     gen_jcc(s, decode->b & 0xf, decode->immediate);
 }
@@ -2050,6 +2058,7 @@ static void gen_JCXZ(DisasContext *s, X86DecodedInsn *decode)
 {
     TCGLabel *taken = gen_new_label();
 
+    gen_notify_jcc(s, decode->immediate);
     gen_update_cc_op(s);
     gen_op_jz_ecx(s, taken);
     gen_conditional_jump_labels(s, decode->immediate, NULL, taken);
@@ -2179,6 +2188,7 @@ static void gen_LOOP(DisasContext *s, X86DecodedInsn *decode)
 {
     TCGLabel *taken = gen_new_label();
 
+    gen_notify_jcc(s, decode->immediate);
     gen_update_cc_op(s);
     gen_op_add_reg_im(s, s->aflag, R_ECX, -1);
     gen_op_jnz_ecx(s, taken);
@@ -2189,6 +2199,8 @@ static void gen_LOOPE(DisasContext *s, X86DecodedInsn *decode)
 {
     TCGLabel *taken = gen_new_label();
     TCGLabel *not_taken = gen_new_label();
+
+    gen_notify_jcc(s, decode->immediate);
 
     gen_update_cc_op(s);
     gen_op_add_reg_im(s, s->aflag, R_ECX, -1);
@@ -2201,6 +2213,8 @@ static void gen_LOOPNE(DisasContext *s, X86DecodedInsn *decode)
 {
     TCGLabel *taken = gen_new_label();
     TCGLabel *not_taken = gen_new_label();
+
+    gen_notify_jcc(s, decode->immediate);
 
     gen_update_cc_op(s);
     gen_op_add_reg_im(s, s->aflag, R_ECX, -1);
