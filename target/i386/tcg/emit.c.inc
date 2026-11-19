@@ -1412,12 +1412,14 @@ static void gen_BZHI(DisasContext *s, X86DecodedInsn *decode)
 
 static void gen_CALL(DisasContext *s, X86DecodedInsn *decode)
 {
+    gen_helper_sym_notify_call(eip_next_tl(s));
     gen_push_v(s, eip_next_tl(s));
     gen_JMP(s, decode);
 }
 
 static void gen_CALL_m(DisasContext *s, X86DecodedInsn *decode)
 {
+    gen_helper_sym_notify_call(eip_next_tl(s));
     gen_push_v(s, eip_next_tl(s));
     gen_JMP_m(s, decode);
 }
@@ -3360,6 +3362,7 @@ static void gen_RET(DisasContext *s, X86DecodedInsn *decode)
     int16_t adjust = decode->e.op1 == X86_TYPE_I ? decode->immediate : 0;
 
     MemOp ot = gen_pop_T0(s);
+    gen_helper_sym_notify_return(s->T0);
     gen_stack_update(s, adjust + (1 << ot));
     gen_op_jmp_v(s, s->T0);
     gen_bnd_jmp(s);
